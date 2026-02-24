@@ -45,11 +45,21 @@ Backend Responsibilities:
 
 ---
 
+
+## 📋 Requirements
+- Node.js (v20 or higher)
+- npm (v7 or higher)
+- Git
+
+---
+
+
 ## 📦 Installation
 
 Clone the repository:
 
-git clone https://github.com/your-org/your-repo.git
+git clone https://github.com/Gradient-PG/-keystroke-dynamics.git
+cd frontend/client
 
 Install dependencies:
 
@@ -59,6 +69,8 @@ Start development server:
 
 npm run dev
 
+The application will run on:
+http://localhost:5173/
 ---
 
 ## 🔗 API Endpoint
@@ -89,6 +101,6 @@ This project is part of a behavioral biometrics system designed for:
 ---
 ## 📸 Screenshots
 
-![Typing Page](./Typing.png)
-![Login Page](./Register.png)
-![Register Page](./Login.png)
+![Typing Page](./public/Typing.PNG)
+![Login Page](./public/Login.PNG)
+![Register Page](./public/Register.PNG)
