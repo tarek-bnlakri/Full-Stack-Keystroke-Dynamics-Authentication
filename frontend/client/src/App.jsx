@@ -12,7 +12,7 @@ function App() {
       path: "/",
       element: <AuthLayout/>,
       children:[
-        {path:"/",element:<HomePage/>}
+        {path:"/home",element:<HomePage/>}
         
       ]
       

@@ -1,7 +1,13 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState,useContext } from "react";
+import { apiRequest } from "../../lib/apiRequest";
+import {Link, useNavigate} from 'react-router-dom'
+
+import { AuthContext } from "../../context/authContext";
 import "./Login.css";
+
 function Login() {
+    const navigate=useNavigate()
+    const {updateData}=useContext(AuthContext)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -23,16 +29,14 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        formData
-      );
+      const response = await apiRequest.post(`/auth/login`,formData);
 
       console.log("Login Success:", response.data);
 
       // Later: save token & redirect
       // localStorage.setItem("token", response.data.token);
-      // navigate("/home");
+      updateData(response.data)
+      navigate("/home");
 
     } catch (err) {
       setError(
@@ -73,6 +77,7 @@ function Login() {
         <button type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
+         <Link to={"/register"}>Don't you have an account ?</Link>
       </form>
     </div>
   );

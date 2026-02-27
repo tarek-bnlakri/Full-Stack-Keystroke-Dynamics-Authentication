@@ -1,9 +1,12 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState,useContext } from "react";
+import { apiRequest } from "../../lib/apiRequest";
+import {Link, useNavigate} from 'react-router-dom'
 import "./Register.css";
 
 function Register() {
+  const navigate=useNavigate()
   const [formData, setFormData] = useState({
+    username:"",
     email: "",
     password: "",
     confirmPassword: "",
@@ -29,11 +32,11 @@ function Register() {
     }
 
     setLoading(true);
-
+    
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        {
+      const response =  apiRequest .post(
+        "/auth/register",
+        {   username:formData.username,
           email: formData.email,
           password: formData.password,
         }
@@ -42,7 +45,7 @@ function Register() {
       console.log("Register Success:", response.data);
 
       // Later → redirect to login page
-      // navigate("/login");
+      navigate("/login");
 
     } catch (err) {
       setError(
@@ -61,6 +64,15 @@ function Register() {
         {error && <p className="error">{error}</p>}
 
         <input
+          type="text"
+          name="username"
+          placeholder="Enter username"
+          value={formData.username}
+          onChange={handleChange}
+          required
+        />
+
+          <input
           type="email"
           name="email"
           placeholder="Enter email"
@@ -90,6 +102,8 @@ function Register() {
         <button type="submit" disabled={loading}>
           {loading ? "Registering..." : "Register"}
         </button>
+          <Link to={"/login"}> You have an account ?</Link>
+
       </form>
     </div>
   );
