@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  email          String           @unique
+  username       String             
+  password       String
+  createdAt      DateTime         @default(now())
+
+  typingSessions TypingSession[]
+}
+
+model TypingSession {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String           @db.ObjectId
+
+  promptText      String
+  typedText       String
+
+  startedAt       DateTime
+  finishedAt      DateTime
+  createdAt       DateTime         @default(now())
+
+  // 🔹 ML Features
+  avgDwellTime    Float
+  avgFlightTime   Float
+  typingSpeed     Float
+  errorRate       Float
+  backspaceCount  Int
+  sessionDuration Float
+
+  user            User             @relation(fields: [userId], references: [id])
+  keystrokeEvents KeystrokeEvent[]
+
+  @@index([userId])
+}
+
+model KeystrokeEvent {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId   String         @db.ObjectId
+
+  key         String
+  keyDownTime DateTime
+  keyUpTime   DateTime
+  dwellTime   Int
+  flightTime  Int?
+
+  session     TypingSession  @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+}
