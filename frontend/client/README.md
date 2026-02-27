@@ -45,21 +45,11 @@ Backend Responsibilities:
 
 ---
 
-
-## 📋 Requirements
-- Node.js (v20 or higher)
-- npm (v7 or higher)
-- Git
-
----
-
-
 ## 📦 Installation
 
 Clone the repository:
 
-git clone https://github.com/Gradient-PG/-keystroke-dynamics.git
-cd frontend/client
+git clone https://github.com/your-org/your-repo.git
 
 Install dependencies:
 
@@ -69,8 +59,6 @@ Start development server:
 
 npm run dev
 
-The application will run on:
-http://localhost:5173/
 ---
 
 ## 🔗 API Endpoint

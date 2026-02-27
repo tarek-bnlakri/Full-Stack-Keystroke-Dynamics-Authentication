@@ -1,22 +1,40 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import "./HomePage.css";
+import { apiRequest } from "../../lib/apiRequest";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/authContext";
+import HomeHead from "../../Components/HomeHead/HomeHead";
 
-const PROMPT =
-  "The quick brown fox jumps over the lazy dog";
+const PROMPT = "The quick brown fox jumps over the lazy dog";
 
 function HomePage() {
+  const { currentUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [text, setText] = useState("");
   const keystrokesRef = useRef([]);
   const startTimeRef = useRef(null);
+  const isSubmittingRef = useRef(false);
 
   const handleKeyDown = (e) => {
     if (!startTimeRef.current) {
-      startTimeRef.current = performance.now();
+      startTimeRef.current = Date.now();
     }
 
-    keystrokesRef.current.push({
+    const now = Date.now();
+    const strokes = keystrokesRef.current;
+
+    // Calculate flight time (time between previous keyUp and current keyDown)
+    if (strokes.length > 0) {
+      const prevStroke = strokes[strokes.length - 1];
+      if (prevStroke.keyUpTime) {
+        prevStroke.flightTime = now - prevStroke.keyUpTime;
+      }
+    }
+
+    strokes.push({
       key: e.key,
-      keyDownTime: performance.now(),
+      keyDownTime: now,
       keyUpTime: null,
       dwellTime: null,
       flightTime: null,
@@ -24,40 +42,57 @@ function HomePage() {
   };
 
   const handleKeyUp = (e) => {
-    const now = performance.now();
+    const now = Date.now();
     const strokes = keystrokesRef.current;
 
-    const lastStroke = strokes.findLast(
-      (s) => s.key === e.key && s.keyUpTime === null
-    );
+    // Find last keyDown without keyUp
+    const lastStroke = [...strokes]
+      .reverse()
+      .find((s) => s.key === e.key && s.keyUpTime === null);
 
     if (lastStroke) {
       lastStroke.keyUpTime = now;
-      lastStroke.dwellTime = lastStroke.keyUpTime - lastStroke.keyDownTime;
+      lastStroke.dwellTime = now - lastStroke.keyDownTime;
     }
   };
 
-  const handleSubmit = () => {
-    const endTime = performance.now();
+  const handleSubmit = async () => {
+    if (isSubmittingRef.current) return;
+    if (!text.trim()) return;
 
-    const sessionData = {
-      promptText: PROMPT,
-      typedText: text,
-      startedAt: startTimeRef.current,
-      finishedAt: endTime,
-      keystrokes: keystrokesRef.current,
-    };
+    try {
+      isSubmittingRef.current = true;
 
-    console.log("Session Data:", sessionData);
+      const sessionData = {
+        promptText: PROMPT,
+        typedText: text,
+        keystrokes: keystrokesRef.current,
+      };
+      
 
-    // Later → send to backend
-    // axios.post("/api/sessions", sessionData);
+      await apiRequest.post("/sessions", sessionData);
+
+      // Reset after successful submission
+      keystrokesRef.current = [];
+      startTimeRef.current = null;
+      setText("");
+
+      alert("Session saved successfully!");
+    } catch (error) {
+      console.error("Submission error:", error);
+      if (error.response?.status === 401) {
+        navigate("/login");
+      }
+    } finally {
+      isSubmittingRef.current = false;
+    }
   };
 
   return (
     <div className="home-container">
-      <h2>Typing Test</h2>
+      <HomeHead />
 
+      <h2>Typing Test</h2>
       <p className="prompt">{PROMPT}</p>
 
       <textarea
