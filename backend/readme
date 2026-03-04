@@ -1,0 +1,87 @@
+# ⌨️ Keystroke Dynamics App
+
+![React](https://img.shields.io/badge/React-19-blue)
+![Vite](https://img.shields.io/badge/Vite-7-purple)
+![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)
+![Express](https://img.shields.io/badge/Express-4.x-lightgrey)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-brightgreen)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-purple)
+![JWT](https://img.shields.io/badge/JWT-Authentication-orange)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
+A **full-stack behavioral biometric system** that captures unique typing patterns for user authentication and machine learning analysis. This application records keystroke dynamics (dwell time, flight time, typing speed) to create a digital "typing fingerprint" for each user.
+
+## 📋 Table of Contents
+- [Overview](#-overview)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Architecture](#-architecture)
+- [Database Schema](#-database-schema)
+- [API Documentation](#-api-documentation)
+- [ML Pipeline](#-ml-pipeline)
+- [Installation](#-installation)
+- [Environment Variables](#-environment-variables)
+- [Usage Guide](#-usage-guide)
+- [Dataset Export](#-dataset-export)
+- [Project Structure](#-project-structure)
+- [Design Decisions](#-design-decisions)
+- [Future Improvements](#-future-improvements)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+## 🎯 Overview
+
+This application captures and analyzes how users type—not just *what* they type, but *how* they type it. By measuring:
+
+- ⏱️ **Dwell Time**: How long each key is held down
+- ⚡ **Flight Time**: Time between releasing one key and pressing the next
+- 📊 **Typing Speed**: Characters per minute
+- 🔄 **Error Patterns**: Backspace usage and correction behavior
+- 🎯 **Accuracy**: Error rates compared to prompt text
+
+The system creates a unique **behavioral biometric profile** that can be used for:
+- Continuous authentication
+- User identification
+- Anomaly detection
+- Behavioral research
+
+## ✨ Features
+
+### Frontend (React + Vite)
+- ✅ **Real-time keystroke capture** with precise timing
+- ✅ **Live typing test interface** with prompt display
+- ✅ **Session management** with automatic data collection
+- ✅ **JWT-based authentication** (login/register)
+- ✅ **Responsive design** for all devices
+- ✅ **Instant feedback** on typing metrics
+
+### Backend (Node.js + Express)
+- ✅ **RESTful API** with JWT authentication
+- ✅ **Raw keystroke storage** for future reprocessing
+- ✅ **Feature extraction service** for biometric analysis
+- ✅ **MongoDB integration** with Prisma ORM
+- ✅ **CSV dataset export** for ML training
+- ✅ **Scalable architecture** with service layer
+
+## 🛠️ Tech Stack
+
+### Frontend
+| Technology | Purpose |
+|------------|---------|
+| **React 19** | UI library |
+| **Vite 7** | Build tool and dev server |
+| **React Router DOM 7** | Navigation |
+| **Axios** | API requests |
+| **CSS Modules** | Styling |
+
+### Backend
+| Technology | Purpose |
+|------------|---------|
+| **Node.js** | Runtime environment |
+| **Express** | Web framework |
+| **MongoDB Atlas** | Cloud database |
+| **Prisma ORM** | Database abstraction |
+| **JWT** | Authentication |
+| **Bcrypt** | Password hashing |
+
+## 🏗️ Architecture
