@@ -7,13 +7,14 @@ import authRouter from './routes/auth.js'
 import homeRouter from './routes/homeRouter.js'
 import sessionReouter from './routes/sessionRouter.js'
 import exportRouter from './routes/exportRouter.js'
+import { verifyJWT } from "./middleware/verifyJWT.js";
 
 app.use(cors({origin:process.env.CLIENT_URL,credentials:true}))
 app.use(express.json());
 app.use(cookieParser())
 
 app.use('/api/auth',authRouter)
-app.use('/api/home',homeRouter)
+app.use('/api/auth/me',verifyJWT)
 app.use('/api/sessions',sessionReouter)
 app.use('/api/dataset',exportRouter)
 

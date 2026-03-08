@@ -1,9 +1,10 @@
 import express from "express"
 
 const router = express.Router()
-import {exportDataset} from "../controllers/datasetController.js"
-import { verifyJWT } from "../middleware/verifyJWT.js"
+import {exportDataset,getDataset} from "../controllers/datasetController.js"
+import { verifyAdmin, verifyJWT } from "../middleware/verifyJWT.js"
 
-router.get('/export',verifyJWT,exportDataset)
+router.get('/',verifyJWT,verifyAdmin,getDataset)
+router.get('/export',verifyJWT,verifyAdmin,exportDataset)
 
 export default router

@@ -29,7 +29,7 @@ try {
 export const login=async(req,res)=>{
     const {email,password}=req.body
     if(!email || !password)
-             res.status(400).json({messsage:"All fields are required"})
+             return res.status(400).json({messsage:"All fields are required"})
 
 
     try {
@@ -40,25 +40,26 @@ export const login=async(req,res)=>{
         })
         if(!validEmail){
             console.log("invald email")
-            return res.sendStatus(401)
+            return res.status(401).json({ message: "Invalid credentials" });
         }
         const validPassword=await bcrypt.compare(password,validEmail.password)
         if(!validPassword){
             console.log("invald password")
-            res.sendStatus(401)
+           return res.status(401).json({ message: "Invalid credentials" });
         }
-        const token =jwt.sign({userId:validEmail.id},process.env.REFRESH_TOKEN_SECRET,{expiresIn:1000*60*60*24})
+        const token =jwt.sign({userId:validEmail.id,isAdmin:validEmail.isAdmin},process.env.REFRESH_TOKEN_SECRET,{expiresIn:"24h"})
         const {password:userPssword,...userInfo}=validEmail
         
         res.cookie("token",token,{
             httpOnly:true,
-            //secure:true,
+            // secure: process.env.NODE_ENV === "production",
             maxAge:1000*60*60*24
         }).status(200).json(userInfo)
        
         
     } catch (error) {
         console.log(error)
+        return res.status(500).json({ message: "Internal server error" });
     }
     
 }

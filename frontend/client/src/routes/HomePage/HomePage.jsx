@@ -2,20 +2,17 @@ import React, { useState, useRef, useContext } from "react";
 import "./HomePage.css";
 import { apiRequest } from "../../lib/apiRequest";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context/authContext";
-import HomeHead from "../../Components/HomeHead/HomeHead";
+import Profile from "../../Components/Profile/Profile";
 
 const PROMPT = "The quick brown fox jumps over the lazy dog";
 
 function HomePage() {
-  const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [text, setText] = useState("");
   const keystrokesRef = useRef([]);
   const startTimeRef = useRef(null);
-  const isSubmittingRef = useRef(false);
-
+const [isSubmitting, setIsSubmitting] = useState(false);
   const handleKeyDown = (e) => {
     if (!startTimeRef.current) {
       startTimeRef.current = Date.now();
@@ -57,11 +54,11 @@ function HomePage() {
   };
 
   const handleSubmit = async () => {
-    if (isSubmittingRef.current) return;
+    if (isSubmitting) return;
     if (!text.trim()) return;
 
     try {
-      isSubmittingRef.current = true;
+      setIsSubmitting(true);
 
       const sessionData = {
         promptText: PROMPT,
@@ -84,13 +81,15 @@ function HomePage() {
         navigate("/login");
       }
     } finally {
-      isSubmittingRef.current = false;
+      setIsSubmitting(false)
     }
   };
 
   return (
+    <div>
+      <Profile/>
     <div className="home-container">
-      <HomeHead />
+      
 
       <h2>Typing Test</h2>
       <p className="prompt">{PROMPT}</p>
@@ -104,9 +103,10 @@ function HomePage() {
         className="typing-box"
       />
 
-      <button onClick={handleSubmit} className="submit-btn">
-        Submit
+      <button disabled={isSubmitting || !text.trim()}   onClick={handleSubmit} className="submit-btn">
+       {isSubmitting ? "Saving..." : "Submit"}
       </button>
+    </div>
     </div>
   );
 }

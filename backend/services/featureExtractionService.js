@@ -1,5 +1,6 @@
 export const extractFeatures = (keystrokes) => {
   const dwellTimes = keystrokes.map(k => k.dwellTime)
+  
   const flightTimes = keystrokes
     .map(k => k.flightTime)
     .filter(f => f !== null)
