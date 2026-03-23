@@ -7,7 +7,7 @@ import { texts } from "../../data/texts";
 
 function HomePage() {
   const navigate = useNavigate();
-  const REQUIRED_ATTEMPTS = 5;
+  const REQUIRED_ATTEMPTS = 1;
 
   const [text, setText] = useState("");
   const [subsessions, setSubsessions] = useState([]);
@@ -200,6 +200,12 @@ function HomePage() {
         >
           {isSubmitting ? "Saving..." : "Submit"}
         </button>
+        
+          <div>
+            <h3 style={{color:"red"}}>if you faced any problem please contact us:</h3>
+            <a href="mailto:keystroksdynamics64@gmail.com">keystroksdynamics64@gmail.com</a>
+     
+          </div>
       </div>
     </div>
   );
