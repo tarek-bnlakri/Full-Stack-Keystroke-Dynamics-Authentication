@@ -5,7 +5,7 @@ export const verifyJWT = (req, res, next) => {
 
     if (!token) return res.status(401).json({ message: "You are not authenticated" });
 
-    jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, payload) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
         if (err) return res.status(403).json({ message: "Invalid token" });
         console.log(payload)
         req.userId = payload.userId;
