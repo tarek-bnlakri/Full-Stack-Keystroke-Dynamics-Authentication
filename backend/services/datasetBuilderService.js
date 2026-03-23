@@ -3,13 +3,14 @@ import prisma from "../lib/prisma.js"
 export const buildDataset = async (filters = {}) => {
   const whereClause = {}
 
-  if (filters.userId) {
-    whereClause.userId = filters.userId
-  }
+  // if (filters.userId) {
+  //   whereClause.userId = filters.userId
+  // }
 
   const sessions = await prisma.typingSession.findMany({
-    where: whereClause,
+    //where: whereClause,
     select: {
+      id:true,
       userId: true,
       avgDwellTime: true,
       avgFlightTime: true,

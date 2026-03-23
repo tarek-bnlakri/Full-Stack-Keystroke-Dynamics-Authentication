@@ -8,27 +8,49 @@ datasource db {
 }
 
 model User {
-  id             String           @id @default(auto()) @map("_id") @db.ObjectId
-  email          String           @unique
-  username       String             
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  email          String          @unique
+  username       String
   password       String
-  createdAt      DateTime         @default(now())
+  isAdmin        Boolean         @default(false)
+  createdAt      DateTime        @default(now())
 
   typingSessions TypingSession[]
 }
 
 model TypingSession {
-  id              String           @id @default(auto()) @map("_id") @db.ObjectId
-  userId          String           @db.ObjectId
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String       @db.ObjectId
 
   promptText      String
-  typedText       String
+  // No typedText — each subsession has its own typedText
 
   startedAt       DateTime
   finishedAt      DateTime
-  createdAt       DateTime         @default(now())
+  createdAt       DateTime     @default(now())
 
-  // 🔹 ML Features
+  // ML features — aggregated (mean) across all attempts
+  avgDwellTime    Float
+  avgFlightTime   Float
+  typingSpeed     Float
+  errorRate       Float
+  backspaceCount  Float        // Float because it's now a mean across attempts
+  sessionDuration Float
+
+  user            User         @relation(fields: [userId], references: [id])
+  subSessions     SubSession[]
+
+  @@index([userId])
+}
+
+model SubSession {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId     String        @db.ObjectId
+  attemptNumber Int
+
+  typedText     String
+
+  // Per-attempt ML features
   avgDwellTime    Float
   avgFlightTime   Float
   typingSpeed     Float
@@ -36,23 +58,11 @@ model TypingSession {
   backspaceCount  Int
   sessionDuration Float
 
-  user            User             @relation(fields: [userId], references: [id])
-  keystrokeEvents KeystrokeEvent[]
+  // Raw keystrokes embedded — no separate KeystrokeEvent collection
+  keystrokes    Json
 
-  @@index([userId])
-}
-
-model KeystrokeEvent {
-  id          String         @id @default(auto()) @map("_id") @db.ObjectId
-  sessionId   String         @db.ObjectId
-
-  key         String
-  keyDownTime DateTime
-  keyUpTime   DateTime
-  dwellTime   Int
-  flightTime  Int?
-
-  session     TypingSession  @relation(fields: [sessionId], references: [id])
+  session       TypingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
 }
+

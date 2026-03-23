@@ -85,3 +85,388 @@ The system creates a unique **behavioral biometric profile** that can be used fo
 | **Bcrypt** | Password hashing |
 
 ## 🏗️ Architecture
+┌─────────────────────────────────────────────────────────────────┐
+│ Frontend (Port 5173) │
+│ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │
+│ │ Auth │ │ Typing │ │ Keystroke │ │
+│ │ Pages │ │ Test │ │ Recorder │ │
+│ └─────────────┘ └─────────────┘ └─────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+│
+▼ API Calls
+│
+┌─────────────────────────────────────────────────────────────────┐
+│ Backend (Port 5000) │
+│ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │
+│ │ Routes │→ │ Controllers │→ │ Services │ │
+│ │ /auth │ │ │ │ - Feature Extraction │ │
+│ │ /sessions │← │ │← │ - Dataset Export │ │
+│ └─────────────┘ └─────────────┘ └─────────────────────────┘ │
+│ │ │
+│ ▼ │
+│ ┌─────────────────┐ │
+│ │ Prisma Client │ │
+│ └─────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+│
+▼
+┌─────────────────┐
+│ MongoDB Atlas │
+│ (Database) │
+└─────────────────┘
+
+
+## 📊 Database Schema
+
+### 👤 User Model
+```prisma
+model User {
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  email          String           @unique
+  password       String
+  createdAt      DateTime         @default(now())
+  typingSessions TypingSession[]
+}
+
+## ⌨️ TypingSession Model
+
+model TypingSession {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String           @db.ObjectId
+  promptText      String
+  typedText       String
+  startedAt       DateTime
+  finishedAt      DateTime
+  createdAt       DateTime         @default(now())
+  
+  // ML Features
+  avgDwellTime    Float
+  avgFlightTime   Float
+  typingSpeed     Float
+  errorRate       Float
+  backspaceCount  Int
+  sessionDuration Float
+
+  user            User             @relation(fields: [userId], references: [id])
+  keystrokeEvents KeystrokeEvent[]
+}
+🔑 KeystrokeEvent Model
+prisma
+model KeystrokeEvent {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId   String         @db.ObjectId
+  key         String
+  keyDownTime DateTime
+  keyUpTime   DateTime
+  dwellTime   Int
+  flightTime  Int?
+  session     TypingSession  @relation(fields: [sessionId], references: [id])
+}
+🌐 API Documentation
+Authentication Endpoints
+Register User
+http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "securepassword"
+}
+Response:
+
+json
+{
+  "id": "65f1a2b3c4d5e6f7a8b9c0d1",
+  "email": "user@example.com",
+  "token": "eyJhbGciOiJIUzI1NiIs..."
+}
+Login User
+http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "securepassword"
+}
+Get Current User
+http
+GET /api/auth/me
+Authorization: Bearer <jwt_token>
+Typing Session Endpoints
+Create Session
+http
+POST /api/session
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+
+{
+  "promptText": "The quick brown fox jumps over the lazy dog",
+  "typedText": "The quick brown fox jumps over the lazy dog",
+  "keystrokes": [
+    {
+      "key": "T",
+      "keyDownTime": 1678901234567,
+      "keyUpTime": 1678901234620,
+      "dwellTime": 53,
+      "flightTime": null
+    },
+    // ... more keystrokes
+  ]
+}
+Response:
+
+json
+{
+  "id": "session123",
+  "userId": "65f1a2b3c4d5e6f7a8b9c0d1",
+  "avgDwellTime": 120.5,
+  "avgFlightTime": 85.2,
+  "typingSpeed": 180,
+  "errorRate": 2.5,
+  "backspaceCount": 3,
+  "sessionDuration": 12.5
+}
+Dataset Export
+Download ML-Ready Dataset
+http
+GET /api/dataset/export
+Authorization: Bearer <jwt_token>
+Optional filter by user:
+
+http
+GET /api/dataset/export?userId=65f1a2b3c4d5e6f7a8b9c0d1
+Response: CSV file with columns:
+
+
+userId,avgDwellTime,avgFlightTime,typingSpeed,errorRate,backspaceCount,sessionDuration
+
+🔄 ML Pipeline
+
+┌────────────┐    ┌────────────┐    ┌────────────┐    ┌────────────┐    ┌────────────┐
+│   User     │    │  Frontend  │    │  Backend   │    │  MongoDB   │    │    ML      │
+│  Types     │───▶│  Captures  │───▶│  Extracts  │───▶│  Stores    │───▶│  Training  │
+│            │    │  Keystrokes│    │  Features  │    │  Features  │    │            │
+└────────────┘    └────────────┘    └────────────┘    └────────────┘    └────────────┘
+       │                 │                 │                 │                 │
+       │   Raw data      │  JSON payload   │  Processed     │  Export CSV     │  Model
+       └─────────────────┴─────────────────┴─────────────────┴─────────────────┴────────▶
+🚀 Installation
+Prerequisites
+Node.js 18+
+
+MongoDB Atlas account
+
+npm or yarn
+
+Git
+
+Step 1: Clone the Repository
+bash
+git clone https://github.com/your-org/keystroke-dynamics-app.git
+cd keystroke-dynamics-app
+Step 2: Backend Setup
+bash
+# Navigate to backend folder
+cd backend
+
+# Install dependencies
+npm install
+
+# Create .env file
+cp .env.example .env
+
+# Edit .env with your credentials
+# DATABASE_URL, JWT_SECRET, PORT
+
+# Run Prisma setup
+npx prisma generate
+npx prisma db push
+
+# Start backend server
+npm run dev
+Backend will run on http://localhost:5000
+
+Step 3: Frontend Setup
+bash
+# Open new terminal, navigate to frontend
+cd frontend/client
+
+# Install dependencies
+npm install
+
+# Create .env file
+echo "VITE_API_URL=http://localhost:5000/api" > .env
+
+# Start frontend dev server
+npm run dev
+Frontend will run on http://localhost:5173
+
+🔐 Environment Variables
+Backend (.env)
+env
+# Database
+DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/keystroke_db"
+
+# Authentication
+JWT_SECRET="your_super_secret_key_here_change_this_in_production"
+
+# Server
+PORT=5000
+NODE_ENV=development
+Frontend (.env)
+env
+# API Configuration
+VITE_API_URL=http://localhost:5000/api
+
+# App Settings
+VITE_APP_NAME=Keystroke Dynamics
+VITE_APP_VERSION=1.0.0
+📖 Usage Guide
+1. Register/Login
+Navigate to http://localhost:5173/register
+
+Create an account with email and password
+
+Login with your credentials
+
+2. Take a Typing Test
+You'll see a prompt: "The quick brown fox jumps over the lazy dog"
+
+Type the sentence in the textarea
+
+The system automatically records every keystroke
+
+Click "Submit" when finished
+
+3. View Your Data
+Each session is saved to the database
+
+Features are automatically extracted
+
+You can export all data as CSV for ML training
+
+4. Export for Machine Learning
+bash
+# Using curl
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+     -o typing_data.csv \
+     http://localhost:5000/api/dataset/export
+📁 Project Structure
+text
+keystroke-dynamics-app/
+├── frontend/                    # React frontend
+│   └── client/
+│       ├── public/              # Static files
+│       ├── src/
+│       │   ├── components/       # Reusable UI components
+│       │   ├── pages/            # Page components
+│       │   │   ├── HomePage/     # Typing test
+│       │   │   ├── Login/        # Login page
+│       │   │   └── Register/     # Registration
+│       │   ├── context/          # Auth context
+│       │   ├── lib/              # Utilities
+│       │   │   └── apiRequest.js # Axios config
+│       │   └── App.jsx           # Main app
+│       ├── .env                  # Environment vars
+│       └── package.json
+│
+├── backend/                      # Node.js backend
+│   ├── prisma/
+│   │   └── schema.prisma         # Database schema
+│   ├── routes/
+│   │   ├── auth.js               # Auth endpoints
+│   │   └── sessions.js           # Session endpoints
+│   ├── controllers/
+│   │   └── sessionController.js
+│   ├── services/
+│   │   └── featureExtractionService.js
+│   ├── middleware/
+│   │   └── auth.js               # JWT verification
+│   ├── lib/
+│   │   └── prisma.js             # Prisma client
+│   ├── .env
+│   ├── server.js
+│   └── package.json
+│
+├── data/                         # ML datasets
+├── .gitignore
+└── README.md                     # This file
+🏛️ Design Decisions
+Decision	Rationale
+Raw + Processed Data Separation	Allows feature reprocessing without losing original data
+Server-side Feature Extraction	Ensures consistent calculation across all clients
+JWT Authentication	Stateless, scalable authentication
+Prisma ORM	Type-safe database operations
+CSV Export	Universal format for all ML tools
+React + Vite	Fast development, optimal builds
+🚧 Future Improvements
+Digraph/Trigraph Analysis - Time between specific key pairs
+
+Train/Test Split Endpoint - Automatic dataset partitioning
+
+Model Inference API - Real-time authentication
+
+Continuous Authentication - Monitor during entire session
+
+Anomaly Detection - Identify unusual typing patterns
+
+Feature Normalization - Standardized ML input
+
+Visualization Dashboard - Typing pattern graphs
+
+Multi-language Support - Different keyboard layouts
+
+🤝 Contributing
+Contributions are welcome! Please follow these steps:
+
+Fork the repository
+
+Create a feature branch (git checkout -b feature/AmazingFeature)
+
+Commit changes (git commit -m 'Add AmazingFeature')
+
+Push to branch (git push origin feature/AmazingFeature)
+
+Open a Pull Request
+
+📄 License
+MIT License - feel free to use this for research and development.
+
+🙏 Acknowledgments
+Built with modern best practices for behavioral biometrics
+
+Inspired by keystroke dynamics research
+
+Designed for ML integration from day one
+
+📊 Quick Reference
+Useful Commands
+bash
+# Start backend
+cd backend && npm run dev
+
+# Start frontend
+cd frontend/client && npm run dev
+
+# Generate Prisma client
+cd backend && npx prisma generate
+
+# Push schema changes
+cd backend && npx prisma db push
+
+# Export dataset
+curl -H "Authorization: Bearer YOUR_TOKEN" -o data.csv http://localhost:5000/api/dataset/export
+Default Ports
+Frontend: http://localhost:5173
+
+Backend: http://localhost:5000
+
+API Base: http://localhost:5000/api
+
+Test Credentials
+text
+Email: test@example.com
+Password: test123
+

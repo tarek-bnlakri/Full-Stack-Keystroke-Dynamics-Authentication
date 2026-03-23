@@ -26,42 +26,47 @@ try {
     
 }
 
-export const login=async(req,res)=>{
-    const {email,password}=req.body
-    if(!email || !password)
-             res.status(400).json({messsage:"All fields are required"})
+export const login = async (req, res) => {
+  const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res.status(400).json({ message: "All fields are required" }); 
+  }
 
-    try {
-        const validEmail=await prisma.user.findUnique({
-            where:{
-                email
-            }
-        })
-        if(!validEmail){
-            console.log("invald email")
-            return res.sendStatus(401)
-        }
-        const validPassword=await bcrypt.compare(password,validEmail.password)
-        if(!validPassword){
-            console.log("invald password")
-            res.sendStatus(401)
-        }
-        const token =jwt.sign({userId:validEmail.id},process.env.REFRESH_TOKEN_SECRET,{expiresIn:1000*60*60*24})
-        const {password:userPssword,...userInfo}=validEmail
-        
-        res.cookie("token",token,{
-            httpOnly:true,
-            //secure:true,
-            maxAge:1000*60*60*24
-        }).status(200).json(userInfo)
-       
-        
-    } catch (error) {
-        console.log(error)
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
-    
-}
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    const { password: _password, ...userInfo } = user;
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",   
+      maxAge: 1000 * 60 * 60 * 24
+    }).status(200).json(userInfo);
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 export const logout=(req,res)=>{
     res.clearCookie("token").status(200).json("logout success")
 }

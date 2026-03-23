@@ -4,6 +4,7 @@ import Register from './routes/Register/Register'
 import HomePage from './routes/HomePage/HomePage'
 import { AuthLayout } from './routes/layout/Layout'
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import ExploreData from './routes/ExploreData/ExploreData'
 
 function App() {
 
@@ -12,7 +13,8 @@ function App() {
       path: "/",
       element: <AuthLayout/>,
       children:[
-        {path:"/home",element:<HomePage/>}
+        {path:"/home",element:<HomePage/>},
+        {path:"/explore-data",element:<ExploreData/>}
         
       ]
       
