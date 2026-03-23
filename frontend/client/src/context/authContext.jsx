@@ -21,6 +21,7 @@ export const AuthContextProvider = ({ children }) => {
     } finally {
       setCurrentUser(null);
       localStorage.removeItem("user");
+      localStorage.removeItem("subsessions");
     }
   }, []);
 
