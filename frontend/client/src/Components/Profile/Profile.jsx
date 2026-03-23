@@ -17,6 +17,9 @@ function Profile() {
 
       if (res.status === 200) {
         localStorage.removeItem("user");
+        localStorage.removeItem("subsessions");
+        localStorage.removeItem("promptIndex");
+
         navigate("/login");
       }
     } catch (err) {

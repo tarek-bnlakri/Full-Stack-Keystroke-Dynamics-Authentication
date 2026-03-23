@@ -7,7 +7,7 @@ import { texts } from "../../data/texts";
 
 function HomePage() {
   const navigate = useNavigate();
-  const REQUIRED_ATTEMPTS = 3;
+  const REQUIRED_ATTEMPTS = 5;
 
   const [text, setText] = useState("");
   const [subsessions, setSubsessions] = useState([]);
@@ -22,7 +22,7 @@ function HomePage() {
     const saved = localStorage.getItem("subsessions");
     const savedIndex = localStorage.getItem("promptIndex");
 
-    if (saved) {
+    if (saved ) {
       const parsed = JSON.parse(saved);
       setSubsessions(parsed);
       console.log(`Restored ${parsed.length} attempt(s) from previous session`);
@@ -139,9 +139,11 @@ function HomePage() {
 
       // Success — clear everything
       setSubsessions([]);
-      setIndexOfText(prev => (prev + 1) % texts.length);
+      const nextIndex = (indexOfText + 1) % texts.length;
+      setIndexOfText(nextIndex);
+
       localStorage.removeItem("subsessions");
-      localStorage.removeItem("promptIndex");
+      localStorage.setItem("promptIndex", nextIndex); 
       alert("Session saved successfully!");
 
     } catch (error) {
