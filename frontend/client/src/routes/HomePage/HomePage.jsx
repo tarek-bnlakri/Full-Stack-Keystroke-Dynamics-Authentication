@@ -7,7 +7,7 @@ import { texts } from "../../data/texts";
 
 function HomePage() {
   const navigate = useNavigate();
-  const REQUIRED_ATTEMPTS = 1;
+  const REQUIRED_ATTEMPTS = 3;
 
   const [text, setText] = useState("");
   const [subsessions, setSubsessions] = useState([]);
