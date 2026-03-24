@@ -106,10 +106,10 @@ function HomePage() {
     if (isSubmitting) return;
     if (!text.trim()) return;
 
-    if (text.trim() !== texts[indexOfText].trim()) {
-      alert("Text does not match!");
-      return;
-    }
+    // if (text.trim() !== texts[indexOfText].trim()) {
+    //   alert("Text does not match!");
+    //   return;
+    // }
 
     const newSubsession = {
       typedText: text,
