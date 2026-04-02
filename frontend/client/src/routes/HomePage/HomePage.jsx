@@ -60,7 +60,7 @@ function HomePage() {
 
   const handleKeyDown = (e) => {
       if (e.key === "Enter") {
-        e.preventDefault(); // prevent newline in textarea
+        e.preventDefault();
         handleSubmit();
       return;
   }
@@ -123,7 +123,6 @@ function HomePage() {
     const updatedSubsessions = [...subsessions, newSubsession];
     setSubsessions(updatedSubsessions);
 
-    // Persist to localStorage after every attempt
     localStorage.setItem("subsessions", JSON.stringify(updatedSubsessions));
     localStorage.setItem("promptIndex", indexOfText);
 
@@ -133,7 +132,6 @@ function HomePage() {
       setIsSubmitting(true);
 
       await apiRequest.post("/sessions", {
-        promptText: texts[indexOfText],
         subsessions: updatedSubsessions,
       });
 
