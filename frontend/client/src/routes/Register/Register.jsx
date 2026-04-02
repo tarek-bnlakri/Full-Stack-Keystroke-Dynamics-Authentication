@@ -34,7 +34,7 @@ function Register() {
     setLoading(true);
     
     try {
-      const response =  apiRequest .post(
+      const response =  await apiRequest .post(
         "/auth/register",
         {   username:formData.username,
           email: formData.email,
@@ -44,7 +44,6 @@ function Register() {
 
       console.log("Register Success:", response.data);
 
-      // Later → redirect to login page
       navigate("/login");
 
     } catch (err) {
