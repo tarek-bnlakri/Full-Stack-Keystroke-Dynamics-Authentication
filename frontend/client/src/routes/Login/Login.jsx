@@ -9,7 +9,7 @@ function Login() {
     const navigate=useNavigate()
     const {updateData}=useContext(AuthContext)
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
   });
 
@@ -33,8 +33,6 @@ function Login() {
 
       console.log("Login Success:", response.data);
 
-      // Later: save token & redirect
-      // localStorage.setItem("token", response.data.token);
       updateData(response.data)
       navigate("/home");
 
@@ -52,13 +50,13 @@ function Login() {
       <form onSubmit={handleSubmit} >
         <h2>Login</h2>
 
-        {error && <p>{error}</p>}
+        {error && <p style={{color:"red"}}>{error}</p>}
 
         <input
-          type="email"
-          name="email"
-          placeholder="Enter email"
-          value={formData.email}
+          type="text"
+          name="username"
+          placeholder="Enter username"
+          value={formData.username}
           onChange={handleChange}
           required
          

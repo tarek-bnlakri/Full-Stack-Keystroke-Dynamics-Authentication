@@ -2,40 +2,60 @@ import bcrypt from 'bcrypt';
 import prisma from '../lib/prisma.js';
 import jwt from "jsonwebtoken"
 
-export const register=async(req,res)=>{
- 
+export const register = async (req, res) => {
+  const { email, password, username } = req.body;
 
-    const {email,password,username}=req.body
-    if(!email || !password || !username)
-             res.status(400).json({messsage:"All fields are required"})
+  if (!email || !password || !username) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
 
-try {
-    const hashedPassword = await bcrypt.hash(password,10)
-    const user=await prisma.user.create({
-        data: {email,password:hashedPassword,username}
-    })
-    if(user)
-        return res.status(203).json("user added successfully")
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-} catch (error) {
-    console.log(error)
-     res.status(403).json({messsage:"Could't add user"})
-   
-    
-}
-    
-}
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        username,
+      },
+    });
+
+    return res.status(201).json({
+      message: "User added successfully",
+      userId: user.id,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    if (error.code === "P2002") {
+      const field = error.meta?.target?.[0];
+
+      if (field === "email") {
+        return res.status(409).json({ message: "Email already exists" });
+      }
+
+      if (field === "username") {
+        return res.status(409).json({ message: "Username already exists" });
+      }
+
+      return res.status(409).json({ message: "Duplicate field value" });
+    }
+
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!email || !password) {
+  if (!username || !password) {
     return res.status(400).json({ message: "All fields are required" }); 
   }
 
   try {
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { username }
     });
 
     if (!user) {
