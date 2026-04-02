@@ -4,10 +4,10 @@ import { extractFeatures, aggregateFeatures } from "../services/processSession.j
 export const createSession = async (req, res) => {
   try {
     const userId = req.userId;
-    const { promptText, subsessions } = req.body;
+    const {  subsessions } = req.body;
 
     // 1. Validate
-    if (!promptText || !Array.isArray(subsessions) || subsessions.length === 0) {
+    if ( !Array.isArray(subsessions) || subsessions.length === 0) {
       return res.status(400).json({ message: "Invalid request data" });
     }
 
@@ -19,15 +19,12 @@ export const createSession = async (req, res) => {
       return res.status(400).json({ message: "No valid subsessions" });
     }
 
-    // 2. Extract features per subsession
     const subsessionFeatures = validSubsessions.map(s =>
       extractFeatures(s.keystrokes)
     );
 
-    // 3. Aggregate across all subsessions for session-level ML features
     const sessionFeatures = aggregateFeatures(subsessionFeatures);
 
-    // 4. Session timing — first keystroke of attempt 1 to last keystroke of last attempt
     const firstAttempt = validSubsessions[0];
     const lastAttempt  = validSubsessions[validSubsessions.length - 1];
 
@@ -40,7 +37,6 @@ export const createSession = async (req, res) => {
     const session = await prisma.typingSession.create({
       data: {
         userId,
-        promptText,
         startedAt,
         finishedAt,
 
